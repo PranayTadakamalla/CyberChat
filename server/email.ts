@@ -11,7 +11,7 @@ export async function sendVerificationEmail(email: string, code: string) {
   try {
     const msg = {
       to: email,
-      from: process.env.SENDGRID_API_KEY.includes('SG.') ? 'noreply@cyberchat.com' : email, // fallback to recipient email if from email not set
+      from: 'security@cyberchat.com', // Using a fixed sender email
       subject: 'Verify your CyberChat account',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
@@ -27,8 +27,12 @@ export async function sendVerificationEmail(email: string, code: string) {
     };
 
     await sgMail.send(msg);
-  } catch (error) {
-    console.error('SendGrid email error:', error);
+  } catch (error: any) {
+    console.error('SendGrid email error:', error.response?.body || error);
+    if (error.response?.body?.errors) {
+      const sendGridError = error.response.body.errors[0];
+      throw new Error(`Email verification failed: ${sendGridError.message}`);
+    }
     throw new Error('Failed to send verification email. Please try again later.');
   }
 }

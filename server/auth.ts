@@ -101,9 +101,9 @@ export function setupAuth(app: Express) {
       console.error('Registration error:', error);
 
       // Check if it's an email sending error
-      if (error instanceof Error && error.message.includes('Failed to send verification email')) {
+      if (error instanceof Error && error.message.includes('Email verification failed')) {
         return res.status(500).json({ 
-          message: "Failed to send verification email. Please try again later or contact support." 
+          message: error.message || "Failed to send verification email. Please try again later or contact support." 
         });
       }
 
