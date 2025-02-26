@@ -68,8 +68,11 @@ export function setupAuth(app: Express) {
     )
   );
 
-  passport.serializeUser((user, done) => done(null, user.id));
-  passport.deserializeUser(async (id: number, done) => {
+  passport.serializeUser((user: any, done) => {
+    done(null, user._id?.toString() || user.id?.toString());
+  });
+  
+  passport.deserializeUser(async (id: string, done) => {
     try {
       const user = await storage.getUser(id);
       done(null, user);
@@ -124,7 +127,10 @@ export function setupAuth(app: Express) {
         const user = await storage.getUserByEmail(email);
         if (user) {
           req.login(user, (err) => {
-            if (err) throw err;
+            if (err) {
+              console.error('Login error:', err);
+              return res.status(500).json({ message: "Login failed after verification" });
+            }
             res.json({ message: "Email verified successfully" });
           });
         }
