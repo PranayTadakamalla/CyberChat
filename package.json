@@ -51,10 +51,7 @@
     "connect-pg-simple": "^10.0.0",
     "crypto": "^1.0.1",
     "date-fns": "^3.6.0",
-<<<<<<< HEAD
     "dotenv": "^16.4.7",
-=======
->>>>>>> 612f6850b3d79e6bed6979e2e09e66ec240eaa9c
     "drizzle-orm": "^0.39.1",
     "drizzle-zod": "^0.7.0",
     "embla-carousel-react": "^8.3.0",
