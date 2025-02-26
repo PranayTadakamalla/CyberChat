@@ -99,7 +99,7 @@ export default function AuthPage() {
   return (
     <div className="min-h-screen bg-background flex">
       <div className="flex-1 flex flex-col justify-center px-4 py-12 sm:px-6 lg:flex-none lg:px-20">
-        <div className="mx-auto w-full max-w-md">
+        <div className="mx-auto w-full max-w-xl">
           {showVerification ? (
             <Card>
               <CardHeader>
@@ -140,7 +140,7 @@ export default function AuthPage() {
                   <CardHeader>
                     <CardTitle>Login to CyberChat</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     <Form {...loginForm}>
                       <form onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-4">
                         <FormField
@@ -183,7 +183,7 @@ export default function AuthPage() {
                   <CardHeader>
                     <CardTitle>Create an Account</CardTitle>
                   </CardHeader>
-                  <CardContent>
+                  <CardContent className="p-6">
                     <Form {...registerForm}>
                       <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-4">
                         <FormField
