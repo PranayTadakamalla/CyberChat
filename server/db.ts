@@ -1,8 +1,5 @@
-<<<<<<< HEAD
 import dotenv from "dotenv";
 dotenv.config();
-=======
->>>>>>> 612f6850b3d79e6bed6979e2e09e66ec240eaa9c
 
 import mongoose from 'mongoose';
 
