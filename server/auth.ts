@@ -103,7 +103,7 @@ export function setupAuth(app: Express) {
       // Check if it's an email sending error
       if (error instanceof Error && error.message.includes('Email verification failed')) {
         return res.status(500).json({ 
-          message: error.message || "Failed to send verification email. Please try again later or contact support." 
+          message: `Email verification failed: The from address does not match a verified Sender Identity. Please contact support to verify your sender email address in SendGrid.` 
         });
       }
 

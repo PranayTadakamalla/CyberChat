@@ -91,6 +91,7 @@ export default function AuthPage() {
         title: "Registration failed",
         description: error instanceof Error ? error.message : "Please try again",
         variant: "destructive",
+        duration: 6000, // Show longer for detailed error messages
       });
     }
   };
