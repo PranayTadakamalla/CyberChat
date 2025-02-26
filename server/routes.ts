@@ -19,7 +19,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Get user's conversation history
   app.get("/api/conversations", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-    const conversations = await storage.getConversations(req.user.id);
+    const conversations = await storage.getConversations(req.user._id);
     res.json(conversations);
   });
 

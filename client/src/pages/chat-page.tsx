@@ -15,8 +15,9 @@ export default function ChatPage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
 
-  const { data: conversations } = useQuery<Conversation[]>({
+  const { data: conversations = [], refetch: refetchConversations } = useQuery<Conversation[]>({
     queryKey: ["/api/conversations"],
+    refetchOnWindowFocus: false,
   });
 
   const chatMutation = useMutation({
@@ -24,8 +25,8 @@ export default function ChatPage() {
       const res = await apiRequest("POST", "/api/chat", { message });
       return res.json();
     },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
+    onSuccess: async () => {
+      await refetchConversations();
       setMessage("");
     },
     onError: (error: Error) => {
