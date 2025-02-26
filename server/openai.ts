@@ -26,7 +26,7 @@ export async function generateChatResponse(message: string): Promise<ChatRespons
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-1.0-pro" });
     const chat = model.startChat({
       history: [
         {
