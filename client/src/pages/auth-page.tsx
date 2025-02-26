@@ -140,7 +140,7 @@ export default function AuthPage() {
                   <CardHeader>
                     <CardTitle>Login to CyberChat</CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6">
+                  <CardContent className="p-8">
                     <Form {...loginForm}>
                       <form onSubmit={loginForm.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-4">
                         <FormField
@@ -183,7 +183,7 @@ export default function AuthPage() {
                   <CardHeader>
                     <CardTitle>Create an Account</CardTitle>
                   </CardHeader>
-                  <CardContent className="p-6">
+                  <CardContent className="p-8">
                     <Form {...registerForm}>
                       <form onSubmit={registerForm.handleSubmit(handleRegister)} className="space-y-4">
                         <FormField
