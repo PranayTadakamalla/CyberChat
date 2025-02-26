@@ -1,11 +1,8 @@
 import sgMail from '@sendgrid/mail';
 import { randomBytes } from 'crypto';
-<<<<<<< HEAD
 import dotenv from "dotenv";
-dotenv.config();
 
-=======
->>>>>>> 612f6850b3d79e6bed6979e2e09e66ec240eaa9c
+dotenv.config();
 
 if (!process.env.SENDGRID_API_KEY) {
   throw new Error("SENDGRID_API_KEY environment variable must be set");
