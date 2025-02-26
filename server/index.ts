@@ -1,7 +1,11 @@
 import express, { type Request, Response, NextFunction } from "express";
 import { registerRoutes } from "./routes";
 import { setupVite, serveStatic, log } from "./vite";
-import { join } from "path"; // Add this import
+import { join, dirname } from "path"; // Import dirname
+import { fileURLToPath } from "url"; // Import fileURLToPath
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename); // Define __dirname using fileURLToPath
 
 const app = express();
 app.use(express.json());
