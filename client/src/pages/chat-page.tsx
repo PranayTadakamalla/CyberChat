@@ -15,9 +15,16 @@ export default function ChatPage() {
   const { user, logoutMutation } = useAuth();
   const { toast } = useToast();
 
+  const scrollRef = React.useRef<HTMLDivElement>(null);
+  
   const { data: conversations = [], refetch: refetchConversations } = useQuery<Conversation[]>({
     queryKey: ["/api/conversations"],
     refetchOnWindowFocus: false,
+    onSuccess: () => {
+      setTimeout(() => {
+        scrollRef.current?.scrollIntoView({ behavior: "smooth" });
+      }, 100);
+    }
   });
 
   const chatMutation = useMutation({
@@ -94,6 +101,7 @@ export default function ChatPage() {
               </div>
             </div>
           ))}
+          <div ref={scrollRef} />
         </ScrollArea>
 
         <form
