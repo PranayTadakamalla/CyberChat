@@ -1,4 +1,6 @@
+
 import { GoogleGenerativeAI } from "@google/generative-ai";
+import rateLimit from "express-rate-limit";
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY || '');
 
@@ -16,6 +18,12 @@ interface ChatResponse {
   suggestedTopics?: string[];
 }
 
+// Create rate limiter
+const apiLimiter = rateLimit({
+  windowMs: 60 * 1000, // 1 minute
+  max: 5 // limit each IP to 5 requests per minute
+});
+
 export async function generateChatResponse(message: string): Promise<ChatResponse> {
   if (!process.env.GEMINI_API_KEY) {
     return {
@@ -26,7 +34,7 @@ export async function generateChatResponse(message: string): Promise<ChatRespons
   }
 
   try {
-    const model = genAI.getGenerativeModel({ model: "gemini-1.5-pro" });
+    const model = genAI.getGenerativeModel({ model: "gemini-pro" });
     const chat = model.startChat({
       history: [
         {
@@ -44,18 +52,20 @@ export async function generateChatResponse(message: string): Promise<ChatRespons
       content,
       isCyberSecurityRelated: true
     };
-  } catch (error: unknown) {
+  } catch (error: any) {
     console.error('Gemini API error:', error);
     let errorMessage = "An error occurred while processing your request.";
 
-    if (error instanceof Error) {
-      errorMessage = error.message;
+    if (error.status === 429) {
+      errorMessage = "I'm currently experiencing high traffic. Please try again in a minute.";
+    } else if (error.message) {
+      errorMessage = `Error: ${error.message}`;
     }
 
     return {
       content: errorMessage,
       isCyberSecurityRelated: false,
-      suggestedTopics: ["Check API Configuration", "Verify API Key"]
+      suggestedTopics: ["Try a different question", "Wait a moment"]
     };
   }
 }
