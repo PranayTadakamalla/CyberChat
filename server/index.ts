@@ -53,15 +53,8 @@ app.use((req, res, next) => {
     serveStatic(app);
   }
 
-  const port = process.env.PORT || 5000;  // ✅ Fixed: Use dynamic port for Render
-  server.listen(
-    {
-      port,
-      host: "0.0.0.0",
-      reusePort: true,
-    },
-    () => {
-      log(`serving on port ${port}`);
-    }
-  );
+  const PORT = process.env.PORT ? Number(process.env.PORT) : 10000; // ✅ Ensure it binds correctly
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
+  });
 })();
