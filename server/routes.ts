@@ -34,7 +34,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const response = await generateChatResponse(message);
 
       const conversation = await storage.saveConversation({
-        userId: req.user.id,
+        userId: req.user._id,
         message,
         response: response.content,
         suggestedTopics: response.suggestedTopics || []
