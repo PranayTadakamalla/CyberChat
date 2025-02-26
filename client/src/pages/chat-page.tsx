@@ -46,7 +46,7 @@ export default function ChatPage() {
             <h1 className="text-xl font-bold">CyberChat</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <span>Welcome, {user?.email}</span>
+            <span>Welcome, {user?.username || user?.email}</span> {/* Display username if available, otherwise email */}
             <Button
               variant="ghost"
               size="sm"
@@ -70,7 +70,7 @@ export default function ChatPage() {
               </div>
               <div className="bg-cyan-500/10 p-3 rounded-lg">
                 <p className="font-medium text-cyan-500">CyberBot</p>
-                <p>{conv.response}</p>
+                <p className="whitespace-pre-wrap break-words">{conv.response}</p>
                 {conv.suggestedTopics && conv.suggestedTopics.length > 0 && (
                   <div className="mt-2 pt-2 border-t border-border">
                     <p className="text-sm text-muted-foreground mb-2">Suggested security topics:</p>
