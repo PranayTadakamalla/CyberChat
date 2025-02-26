@@ -1,3 +1,4 @@
+import React from "react";
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { Card } from "@/components/ui/card";
@@ -17,14 +18,16 @@ export default function ChatPage() {
 
   const scrollRef = React.useRef<HTMLDivElement>(null);
 
-  const { data: conversations = [], refetch: refetchConversations } = useQuery<Conversation[]>({
+  const { data: conversations = [], refetch: refetchConversations } = useQuery<
+    Conversation[]
+  >({
     queryKey: ["/api/conversations"],
     refetchOnWindowFocus: false,
     onSuccess: () => {
       setTimeout(() => {
         scrollRef.current?.scrollIntoView({ behavior: "smooth" });
       }, 100);
-    }
+    },
   });
 
   const chatMutation = useMutation({
@@ -59,7 +62,8 @@ export default function ChatPage() {
             <h1 className="text-xl font-bold">CyberChat</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <span>Welcome, {user?.username || user?.email}</span> {/* Display username if available, otherwise email */}
+            <span>Welcome, {user?.username || user?.email}</span>{" "}
+            {/* Display username if available, otherwise email */}
             <Button
               variant="ghost"
               size="sm"
@@ -83,10 +87,14 @@ export default function ChatPage() {
               </div>
               <div className="bg-cyan-500/10 p-3 rounded-lg">
                 <p className="font-medium text-cyan-500">CyberBot</p>
-                <p className="whitespace-pre-wrap break-words">{conv.response}</p>
+                <p className="whitespace-pre-wrap break-words">
+                  {conv.response}
+                </p>
                 {conv.suggestedTopics && conv.suggestedTopics.length > 0 && (
                   <div className="mt-2 pt-2 border-t border-border">
-                    <p className="text-sm text-muted-foreground mb-2">Suggested security topics:</p>
+                    <p className="text-sm text-muted-foreground mb-2">
+                      Suggested security topics:
+                    </p>
                     <div className="flex flex-wrap gap-2">
                       {conv.suggestedTopics.map((topic, index) => (
                         <Button
@@ -125,8 +133,15 @@ export default function ChatPage() {
             className="flex-1"
             disabled={chatMutation.isPending}
           />
-          <Button type="submit" disabled={chatMutation.isPending || !message.trim()}>
-            {chatMutation.isPending ? "Sending..." : <Send className="h-4 w-4" />}
+          <Button
+            type="submit"
+            disabled={chatMutation.isPending || !message.trim()}
+          >
+            {chatMutation.isPending ? (
+              "Sending..."
+            ) : (
+              <Send className="h-4 w-4" />
+            )}
           </Button>
         </form>
       </main>
