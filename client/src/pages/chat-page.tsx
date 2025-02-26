@@ -71,6 +71,25 @@ export default function ChatPage() {
               <div className="bg-cyan-500/10 p-3 rounded-lg">
                 <p className="font-medium text-cyan-500">CyberBot</p>
                 <p>{conv.response}</p>
+                {conv.suggestedTopics && conv.suggestedTopics.length > 0 && (
+                  <div className="mt-2 pt-2 border-t border-border">
+                    <p className="text-sm text-muted-foreground mb-2">Suggested security topics:</p>
+                    <div className="flex flex-wrap gap-2">
+                      {conv.suggestedTopics.map((topic, index) => (
+                        <Button
+                          key={index}
+                          variant="outline"
+                          size="sm"
+                          onClick={() => {
+                            setMessage(topic);
+                          }}
+                        >
+                          {topic}
+                        </Button>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           ))}

@@ -3,21 +3,34 @@ import OpenAI from "openai";
 // the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const CYBERSECURITY_SYSTEM_PROMPT = `You are a cybersecurity expert chatbot. Your role is to:
-1. Answer questions related to cybersecurity, information security, and digital safety
-2. Provide practical advice on security best practices
-3. Explain security concepts in a clear, understandable way
-4. Decline to answer questions not related to cybersecurity
+const CYBERSECURITY_SYSTEM_PROMPT = `You are a friendly and knowledgeable cybersecurity expert chatbot. Your role is to:
 
-If a question is not related to cybersecurity, respond with:
-"I'm here to assist with cybersecurity topics. If you need help with cybersecurity concepts, feel free to ask!"
+1. Respond naturally to greetings and pleasantries while maintaining a security-focused persona
+2. Answer questions related to cybersecurity, information security, and digital safety in detail
+3. Provide practical advice and step-by-step guidance on security best practices
+4. Explain complex security concepts in a clear, understandable way
+5. For non-security questions, politely redirect to cybersecurity topics
 
-Format your response as a JSON object with 'content' and 'isCyberSecurityRelated' fields.`;
+When responding:
+- For greetings (e.g., "hi", "hello", "how are you"): Respond naturally but mention your security expertise
+- For cybersecurity questions: Provide detailed, actionable answers
+- For non-security questions: Politely explain that you specialize in cybersecurity and suggest some security-related topics
+- Always maintain context for follow-up questions about security topics
 
-export async function generateChatResponse(message: string): Promise<{
+Format your response as a JSON object with:
+{
+  "content": "Your response text",
+  "isCyberSecurityRelated": boolean,
+  "suggestedTopics": ["topic1", "topic2"] // Only include for non-security questions
+}`;
+
+interface ChatResponse {
   content: string;
   isCyberSecurityRelated: boolean;
-}> {
+  suggestedTopics?: string[];
+}
+
+export async function generateChatResponse(message: string): Promise<ChatResponse> {
   try {
     const response = await openai.chat.completions.create({
       model: "gpt-4o",
@@ -35,7 +48,8 @@ export async function generateChatResponse(message: string): Promise<{
       const result = JSON.parse(content);
       return {
         content: result.content,
-        isCyberSecurityRelated: result.isCyberSecurityRelated
+        isCyberSecurityRelated: result.isCyberSecurityRelated,
+        suggestedTopics: result.suggestedTopics
       };
     } catch (parseError) {
       console.error('Error parsing OpenAI response:', parseError);

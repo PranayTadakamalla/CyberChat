@@ -36,11 +36,13 @@ export async function registerRoutes(app: Express): Promise<Server> {
       const conversation = await storage.saveConversation({
         userId: req.user.id,
         message,
-        response: response.content
+        response: response.content,
+        suggestedTopics: response.suggestedTopics || []
       });
 
       res.json(response);
     } catch (error) {
+      console.error('Chat error:', error);
       res.status(500).json({ error: "Failed to generate response" });
     }
   });

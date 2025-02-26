@@ -19,6 +19,7 @@ export const conversations = pgTable("conversations", {
   userId: integer("user_id").notNull(),
   message: text("message").notNull(),
   response: text("response").notNull(),
+  suggestedTopics: text("suggested_topics").array(),
   timestamp: timestamp("timestamp").defaultNow().notNull(),
 });
 
@@ -38,6 +39,7 @@ export const insertConversationSchema = createInsertSchema(conversations).pick({
   userId: true,
   message: true,
   response: true,
+  suggestedTopics: true,
 });
 
 export type InsertUser = z.infer<typeof insertUserSchema>;
