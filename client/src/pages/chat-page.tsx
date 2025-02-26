@@ -16,7 +16,7 @@ export default function ChatPage() {
   const { toast } = useToast();
 
   const scrollRef = React.useRef<HTMLDivElement>(null);
-  
+
   const { data: conversations = [], refetch: refetchConversations } = useQuery<Conversation[]>({
     queryKey: ["/api/conversations"],
     refetchOnWindowFocus: false,
@@ -42,10 +42,11 @@ export default function ChatPage() {
     },
     onError: (error: Error) => {
       toast({
-        title: "Failed to send message",
-        description: "Please try again later.",
         variant: "destructive",
+        title: "Failed to send message",
+        description: error.message || "Please try again later",
       });
+      setMessage("");
     },
   });
 
