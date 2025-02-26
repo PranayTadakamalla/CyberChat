@@ -6,6 +6,7 @@ import { scrypt, randomBytes, timingSafeEqual } from "crypto";
 import { promisify } from "util";
 import { storage } from "./storage";
 import { User as SelectUser } from "@shared/schema";
+import { sendVerificationEmail, generateVerificationCode, getVerificationExpiry } from "./email";
 
 declare global {
   namespace Express {
@@ -47,9 +48,18 @@ export function setupAuth(app: Express) {
       async (email, password, done) => {
         try {
           const user = await storage.getUserByEmail(email);
-          if (!user || !(await comparePasswords(password, user.password))) {
+          if (!user) {
             return done(null, false, { message: "Invalid email or password" });
           }
+
+          if (!user.isVerified) {
+            return done(null, false, { message: "Please verify your email first" });
+          }
+
+          if (!(await comparePasswords(password, user.password))) {
+            return done(null, false, { message: "Invalid email or password" });
+          }
+
           return done(null, user);
         } catch (error) {
           return done(error);
@@ -75,17 +85,46 @@ export function setupAuth(app: Express) {
         return res.status(400).json({ message: "Email already registered" });
       }
 
+      const verificationCode = generateVerificationCode();
+      const verificationExpiry = getVerificationExpiry();
+
       const user = await storage.createUser({
         ...req.body,
         password: await hashPassword(req.body.password),
       });
 
-      req.login(user, (err) => {
-        if (err) throw err;
-        res.status(201).json(user);
-      });
+      await storage.updateVerificationCode(user.email, verificationCode, verificationExpiry);
+      await sendVerificationEmail(user.email, verificationCode);
+
+      res.status(201).json({ message: "Registration successful. Please check your email for verification code." });
     } catch (error) {
+      console.error('Registration error:', error);
       res.status(500).json({ message: "Registration failed" });
+    }
+  });
+
+  app.post("/api/verify", async (req, res) => {
+    const { email, code } = req.body;
+
+    if (!email || !code) {
+      return res.status(400).json({ message: "Email and verification code are required" });
+    }
+
+    try {
+      const isValid = await storage.verifyUser(email, code);
+      if (isValid) {
+        const user = await storage.getUserByEmail(email);
+        if (user) {
+          req.login(user, (err) => {
+            if (err) throw err;
+            res.json({ message: "Email verified successfully" });
+          });
+        }
+      } else {
+        res.status(400).json({ message: "Invalid or expired verification code" });
+      }
+    } catch (error) {
+      res.status(500).json({ message: "Verification failed" });
     }
   });
 

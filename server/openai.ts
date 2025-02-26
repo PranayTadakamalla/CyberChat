@@ -30,12 +30,22 @@ export async function generateChatResponse(message: string): Promise<{
 
     // Ensure the content is not null before parsing
     const content = response.choices[0].message.content || '{"content": "Error generating response", "isCyberSecurityRelated": false}';
-    const result = JSON.parse(content);
-    return {
-      content: result.content,
-      isCyberSecurityRelated: result.isCyberSecurityRelated
-    };
+
+    try {
+      const result = JSON.parse(content);
+      return {
+        content: result.content,
+        isCyberSecurityRelated: result.isCyberSecurityRelated
+      };
+    } catch (parseError) {
+      console.error('Error parsing OpenAI response:', parseError);
+      return {
+        content: "I apologize, but I encountered an error processing your request. Please try again.",
+        isCyberSecurityRelated: false
+      };
+    }
   } catch (error: unknown) {
+    console.error('OpenAI API error:', error);
     const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
     throw new Error("Failed to generate response: " + errorMessage);
   }

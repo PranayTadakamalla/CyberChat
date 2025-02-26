@@ -5,9 +5,13 @@ import { z } from "zod";
 export const users = pgTable("users", {
   id: serial("id").primaryKey(),
   email: text("email").notNull().unique(),
+  username: text("username").notNull(),
   password: text("password").notNull(),
   mfaEnabled: boolean("mfa_enabled").default(false).notNull(),
   mfaSecret: text("mfa_secret"),
+  isVerified: boolean("is_verified").default(false).notNull(),
+  verificationCode: text("verification_code"),
+  verificationExpiry: timestamp("verification_expiry"),
 });
 
 export const conversations = pgTable("conversations", {
@@ -20,10 +24,14 @@ export const conversations = pgTable("conversations", {
 
 export const insertUserSchema = createInsertSchema(users).pick({
   email: true,
+  username: true,
   password: true,
 }).extend({
   email: z.string().email("Please enter a valid email address"),
-  password: z.string().min(6, "Password must be at least 6 characters"),
+  username: z.string().min(3, "Username must be at least 3 characters"),
+  password: z.string().min(6, "Password must be at least 6 characters")
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 
+      "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
 });
 
 export const insertConversationSchema = createInsertSchema(conversations).pick({

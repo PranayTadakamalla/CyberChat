@@ -8,9 +8,10 @@ const MemoryStore = createMemoryStore(session);
 // Storage interface definition
 export interface IStorage {
   getUser(id: number): Promise<User | undefined>;
-  getUserByUsername(username: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
+  verifyUser(email: string, code: string): Promise<boolean>;
+  updateVerificationCode(email: string, code: string, expiry: Date): Promise<void>;
   getConversations(userId: number): Promise<Conversation[]>;
   saveConversation(conversation: InsertConversation): Promise<Conversation>;
   sessionStore: session.Store;
@@ -37,12 +38,6 @@ export class MemStorage implements IStorage {
     return this.users.get(id);
   }
 
-  async getUserByUsername(username: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.username === username,
-    );
-  }
-
   async getUserByEmail(email: string): Promise<User | undefined> {
     return Array.from(this.users.values()).find(
       (user) => user.email === email,
@@ -55,10 +50,40 @@ export class MemStorage implements IStorage {
       ...insertUser, 
       id,
       mfaEnabled: false,
-      mfaSecret: null
+      mfaSecret: null,
+      isVerified: false,
+      verificationCode: null,
+      verificationExpiry: null
     };
     this.users.set(id, user);
     return user;
+  }
+
+  async verifyUser(email: string, code: string): Promise<boolean> {
+    const user = await this.getUserByEmail(email);
+    if (!user) return false;
+
+    const isValid = user.verificationCode === code && 
+                   user.verificationExpiry && 
+                   new Date() < new Date(user.verificationExpiry);
+
+    if (isValid) {
+      user.isVerified = true;
+      user.verificationCode = null;
+      user.verificationExpiry = null;
+      this.users.set(user.id, user);
+    }
+
+    return isValid;
+  }
+
+  async updateVerificationCode(email: string, code: string, expiry: Date): Promise<void> {
+    const user = await this.getUserByEmail(email);
+    if (!user) return;
+
+    user.verificationCode = code;
+    user.verificationExpiry = expiry;
+    this.users.set(user.id, user);
   }
 
   async getConversations(userId: number): Promise<Conversation[]> {
