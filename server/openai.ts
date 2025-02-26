@@ -1,6 +1,6 @@
+
 import OpenAI from "openai";
 
-// the newest OpenAI model is "gpt-4o" which was released May 13, 2024. do not change this unless explicitly requested by the user
 const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
 const CYBERSECURITY_SYSTEM_PROMPT = `You are a friendly and knowledgeable cybersecurity expert chatbot. Your role is to:
@@ -31,9 +31,17 @@ interface ChatResponse {
 }
 
 export async function generateChatResponse(message: string): Promise<ChatResponse> {
+  if (!process.env.OPENAI_API_KEY) {
+    return {
+      content: "OpenAI API key is not configured. Please add it to the Secrets tool.",
+      isCyberSecurityRelated: false,
+      suggestedTopics: ["Configure API Key"]
+    };
+  }
+
   try {
     const response = await openai.chat.completions.create({
-      model: "gpt-4o",
+      model: "gpt-3.5-turbo", // Using a more widely available model
       messages: [
         { role: "system", content: CYBERSECURITY_SYSTEM_PROMPT },
         { role: "user", content: message }
@@ -41,7 +49,6 @@ export async function generateChatResponse(message: string): Promise<ChatRespons
       response_format: { type: "json_object" }
     });
 
-    // Ensure the content is not null before parsing
     const content = response.choices[0].message.content || '{"content": "Error generating response", "isCyberSecurityRelated": false}';
 
     try {
@@ -60,7 +67,20 @@ export async function generateChatResponse(message: string): Promise<ChatRespons
     }
   } catch (error: unknown) {
     console.error('OpenAI API error:', error);
-    const errorMessage = error instanceof Error ? error.message : 'Unknown error occurred';
-    throw new Error("Failed to generate response: " + errorMessage);
+    let errorMessage = "An error occurred while processing your request.";
+    
+    if (error instanceof Error) {
+      if (error.message.includes("quota")) {
+        errorMessage = "API quota exceeded. Please check your OpenAI account.";
+      } else if (error.message.includes("invalid")) {
+        errorMessage = "Invalid API key. Please check your API key configuration.";
+      }
+    }
+
+    return {
+      content: errorMessage,
+      isCyberSecurityRelated: false,
+      suggestedTopics: ["Check API Configuration", "Verify API Key"]
+    };
   }
 }
