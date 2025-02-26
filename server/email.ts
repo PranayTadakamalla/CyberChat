@@ -11,7 +11,7 @@ export async function sendVerificationEmail(email: string, code: string) {
   try {
     const msg = {
       to: email,
-      from: process.env.EMAIL_USER!, // Using the verified sender email from environment variables
+      from: 'pranaytadakamalla@gmail.com', // Using your verified email address
       subject: 'Verify your CyberChat account',
       html: `
         <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
