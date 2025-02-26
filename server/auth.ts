@@ -99,7 +99,15 @@ export function setupAuth(app: Express) {
       res.status(201).json({ message: "Registration successful. Please check your email for verification code." });
     } catch (error) {
       console.error('Registration error:', error);
-      res.status(500).json({ message: "Registration failed" });
+
+      // Check if it's an email sending error
+      if (error instanceof Error && error.message.includes('Failed to send verification email')) {
+        return res.status(500).json({ 
+          message: "Failed to send verification email. Please try again later or contact support." 
+        });
+      }
+
+      res.status(500).json({ message: "Registration failed. Please try again later." });
     }
   });
 

@@ -23,7 +23,7 @@ const registerSchema = z.object({
   username: z.string().min(3, "Username must be at least 3 characters"),
   password: z.string()
     .min(6, "Password must be at least 6 characters")
-    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/, 
+    .regex(/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/,
       "Password must contain at least one uppercase letter, one lowercase letter, and one number"),
 });
 
@@ -58,17 +58,19 @@ export default function AuthPage() {
 
   const handleVerification = async (data: z.infer<typeof verifySchema>) => {
     try {
-      await apiRequest("POST", "/api/verify", {
+      const response = await apiRequest("POST", "/api/verify", {
         email: registeredEmail,
         code: data.code,
       });
+      const result = await response.json();
 
       toast({
-        title: "Email verified",
-        description: "You can now log in with your credentials",
+        title: "Success",
+        description: result.message,
       });
 
       setShowVerification(false);
+      loginForm.reset({ email: registeredEmail, password: "" });
     } catch (error) {
       toast({
         title: "Verification failed",
@@ -83,11 +85,8 @@ export default function AuthPage() {
       await registerMutation.mutateAsync(data);
       setRegisteredEmail(data.email);
       setShowVerification(true);
-      toast({
-        title: "Registration successful",
-        description: "Please check your email for the verification code",
-      });
     } catch (error) {
+      console.error("Registration error:", error);
       toast({
         title: "Registration failed",
         description: error instanceof Error ? error.message : "Please try again",
