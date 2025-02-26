@@ -11,7 +11,7 @@ import { z } from "zod";
 import { Shield, Lock } from "lucide-react";
 
 const authSchema = z.object({
-  username: z.string().min(3, "Username must be at least 3 characters"),
+  email: z.string().email("Please enter a valid email address"),
   password: z.string().min(6, "Password must be at least 6 characters"),
 });
 
@@ -21,7 +21,7 @@ export default function AuthPage() {
   const form = useForm<z.infer<typeof authSchema>>({
     resolver: zodResolver(authSchema),
     defaultValues: {
-      username: "",
+      email: "",
       password: "",
     },
   });
@@ -50,12 +50,12 @@ export default function AuthPage() {
                     <form onSubmit={form.handleSubmit((data) => loginMutation.mutate(data))} className="space-y-4">
                       <FormField
                         control={form.control}
-                        name="username"
+                        name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Username</FormLabel>
+                            <FormLabel>Email</FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Input type="email" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>
@@ -93,12 +93,12 @@ export default function AuthPage() {
                     <form onSubmit={form.handleSubmit((data) => registerMutation.mutate(data))} className="space-y-4">
                       <FormField
                         control={form.control}
-                        name="username"
+                        name="email"
                         render={({ field }) => (
                           <FormItem>
-                            <FormLabel>Username</FormLabel>
+                            <FormLabel>Email</FormLabel>
                             <FormControl>
-                              <Input {...field} />
+                              <Input type="email" {...field} />
                             </FormControl>
                             <FormMessage />
                           </FormItem>

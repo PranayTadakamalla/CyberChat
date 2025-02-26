@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { Card, CardContent } from "@/components/ui/card";
+import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useAuth } from "@/hooks/use-auth";
@@ -8,10 +8,12 @@ import { Send, Shield, LogOut } from "lucide-react";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { Conversation } from "@shared/schema";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { useToast } from "@/hooks/use-toast";
 
 export default function ChatPage() {
   const [message, setMessage] = useState("");
   const { user, logoutMutation } = useAuth();
+  const { toast } = useToast();
 
   const { data: conversations } = useQuery<Conversation[]>({
     queryKey: ["/api/conversations"],
@@ -26,6 +28,13 @@ export default function ChatPage() {
       queryClient.invalidateQueries({ queryKey: ["/api/conversations"] });
       setMessage("");
     },
+    onError: (error: Error) => {
+      toast({
+        title: "Failed to send message",
+        description: "Please try again later.",
+        variant: "destructive",
+      });
+    },
   });
 
   return (
@@ -37,7 +46,7 @@ export default function ChatPage() {
             <h1 className="text-xl font-bold">CyberChat</h1>
           </div>
           <div className="flex items-center space-x-4">
-            <span>Welcome, {user?.username}</span>
+            <span>Welcome, {user?.email}</span>
             <Button
               variant="ghost"
               size="sm"
