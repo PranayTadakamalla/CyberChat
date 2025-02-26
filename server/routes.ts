@@ -26,9 +26,7 @@ export async function registerRoutes(app: Express): Promise<Server> {
   // Chat endpoint
   app.post("/api/chat", async (req, res) => {
     if (!req.isAuthenticated()) return res.sendStatus(401);
-
     const { message } = req.body;
-    if (!message) return res.status(400).json({ error: "Message is required" });
 
     try {
       const response = await generateChatResponse(message);
@@ -40,10 +38,16 @@ export async function registerRoutes(app: Express): Promise<Server> {
         suggestedTopics: response.suggestedTopics || []
       });
 
-      res.json(response);
+      res.json({
+        success: true,
+        conversation
+      });
     } catch (error) {
       console.error('Chat error:', error);
-      res.status(500).json({ error: "Failed to generate response" });
+      res.status(500).json({ 
+        success: false, 
+        error: 'Failed to process chat message' 
+      });
     }
   });
 

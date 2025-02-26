@@ -30,11 +30,15 @@ export default function ChatPage() {
   const chatMutation = useMutation({
     mutationFn: async (message: string) => {
       const res = await apiRequest("POST", "/api/chat", { message });
-      return res.json();
+      const data = await res.json();
+      return data;
     },
-    onSuccess: async () => {
+    onSuccess: async (data) => {
       await refetchConversations();
       setMessage("");
+      if (scrollRef.current) {
+        scrollRef.current.scrollIntoView({ behavior: "smooth" });
+      }
     },
     onError: (error: Error) => {
       toast({
