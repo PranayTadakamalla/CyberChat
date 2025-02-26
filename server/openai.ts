@@ -31,12 +31,12 @@ export async function generateChatResponse(message: string): Promise<ChatRespons
       history: [
         {
           role: "user",
-          parts: CYBERSECURITY_SYSTEM_PROMPT,
+          parts: [{ text: CYBERSECURITY_SYSTEM_PROMPT }]
         }
       ]
     });
 
-    const result = await chat.sendMessage(message);
+    const result = await chat.sendMessage([{ text: message }]);
     const response = await result.response;
     const content = response.text();
 
