@@ -42,7 +42,6 @@ app.use((req, res, next) => {
   app.use((err: any, _req: Request, res: Response, _next: NextFunction) => {
     const status = err.status || err.statusCode || 500;
     const message = err.message || "Internal Server Error";
-
     res.status(status).json({ message });
     throw err;
   });
@@ -50,10 +49,11 @@ app.use((req, res, next) => {
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
-    serveStatic(app);
+    const staticPath = join(__dirname, "../dist");
+    app.use(express.static(staticPath));
   }
 
-  const PORT = process.env.PORT ? Number(process.env.PORT) : 10000; // ✅ Ensure it binds correctly
+  const PORT = process.env.PORT ? Number(process.env.PORT) : 10000;
   server.listen(PORT, "0.0.0.0", () => {
     console.log(`🚀 Server running on http://0.0.0.0:${PORT}`);
   });
