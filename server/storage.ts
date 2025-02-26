@@ -1,109 +1,79 @@
-// Import necessary types
 import { User, InsertUser, Conversation, InsertConversation } from "@shared/schema";
 import createMemoryStore from "memorystore";
 import session from "express-session";
+import { UserModel, ChatModel } from './db';
 
 const MemoryStore = createMemoryStore(session);
 
-// Storage interface definition
 export interface IStorage {
-  getUser(id: number): Promise<User | undefined>;
+  getUser(id: string): Promise<User | undefined>;
   getUserByEmail(email: string): Promise<User | undefined>;
   createUser(user: InsertUser): Promise<User>;
   verifyUser(email: string, code: string): Promise<boolean>;
   updateVerificationCode(email: string, code: string, expiry: Date): Promise<void>;
-  getConversations(userId: number): Promise<Conversation[]>;
+  getConversations(userId: string): Promise<Conversation[]>;
   saveConversation(conversation: InsertConversation): Promise<Conversation>;
   sessionStore: session.Store;
 }
 
-export class MemStorage implements IStorage {
-  private users: Map<number, User>;
-  private conversations: Map<number, Conversation[]>;
-  private currentUserId: number;
-  private currentConversationId: number;
+export class MongoStorage implements IStorage {
   sessionStore: session.Store;
 
   constructor() {
-    this.users = new Map();
-    this.conversations = new Map();
-    this.currentUserId = 1;
-    this.currentConversationId = 1;
     this.sessionStore = new MemoryStore({
       checkPeriod: 86400000,
     });
   }
 
-  async getUser(id: number): Promise<User | undefined> {
-    return this.users.get(id);
+  async getUser(id: string): Promise<User | undefined> {
+    const user = await UserModel.findById(id);
+    return user ? user.toObject() : undefined;
   }
 
   async getUserByEmail(email: string): Promise<User | undefined> {
-    return Array.from(this.users.values()).find(
-      (user) => user.email === email,
-    );
+    const user = await UserModel.findOne({ email });
+    return user ? user.toObject() : undefined;
   }
 
   async createUser(insertUser: InsertUser): Promise<User> {
-    const id = this.currentUserId++;
-    const user: User = { 
-      ...insertUser, 
-      id,
-      mfaEnabled: false,
-      mfaSecret: null,
-      isVerified: false,
-      verificationCode: null,
-      verificationExpiry: null
-    };
-    this.users.set(id, user);
-    return user;
+    const user = new UserModel(insertUser);
+    await user.save();
+    return user.toObject();
   }
 
   async verifyUser(email: string, code: string): Promise<boolean> {
-    const user = await this.getUserByEmail(email);
-    if (!user) return false;
+    const user = await UserModel.findOne({ 
+      email,
+      verificationCode: code,
+      verificationExpiry: { $gt: new Date() }
+    });
 
-    const isValid = user.verificationCode === code && 
-                   user.verificationExpiry && 
-                   new Date() < new Date(user.verificationExpiry);
-
-    if (isValid) {
+    if (user) {
       user.isVerified = true;
       user.verificationCode = null;
       user.verificationExpiry = null;
-      this.users.set(user.id, user);
+      await user.save();
+      return true;
     }
-
-    return isValid;
+    return false;
   }
 
   async updateVerificationCode(email: string, code: string, expiry: Date): Promise<void> {
-    const user = await this.getUserByEmail(email);
-    if (!user) return;
-
-    user.verificationCode = code;
-    user.verificationExpiry = expiry;
-    this.users.set(user.id, user);
+    await UserModel.updateOne(
+      { email },
+      { verificationCode: code, verificationExpiry: expiry }
+    );
   }
 
-  async getConversations(userId: number): Promise<Conversation[]> {
-    return this.conversations.get(userId) || [];
+  async getConversations(userId: string): Promise<Conversation[]> {
+    return ChatModel.find({ userId }).sort({ timestamp: -1 });
   }
 
   async saveConversation(conversation: InsertConversation): Promise<Conversation> {
-    const id = this.currentConversationId++;
-    const newConversation: Conversation = {
-      ...conversation,
-      id,
-      timestamp: new Date()
-    };
-
-    const userConversations = this.conversations.get(conversation.userId) || [];
-    userConversations.push(newConversation);
-    this.conversations.set(conversation.userId, userConversations);
-
-    return newConversation;
+    const chat = new ChatModel(conversation);
+    await chat.save();
+    return chat.toObject();
   }
 }
 
-export const storage = new MemStorage();
+export const storage = new MongoStorage();

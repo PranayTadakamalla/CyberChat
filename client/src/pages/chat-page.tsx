@@ -61,7 +61,7 @@ export default function ChatPage() {
       </header>
 
       <main className="flex-1 container mx-auto px-4 py-6 flex flex-col">
-        <ScrollArea className="flex-1 rounded-lg border border-border bg-card p-4 mb-4">
+        <ScrollArea className="flex-1 rounded-lg border border-border bg-card p-4 mb-4 flex flex-col-reverse">
           {conversations?.map((conv) => (
             <div key={conv.id} className="mb-4">
               <div className="bg-muted p-3 rounded-lg mb-2">
