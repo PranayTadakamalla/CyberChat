@@ -24,9 +24,17 @@ app.use((req, res, next) => {
       if (capturedJsonResponse) {
         logLine += ` :: ${JSON.stringify(capturedJsonResponse)}`;
       }
+<<<<<<< HEAD
       if (logLine.length > 80) {
         logLine = logLine.slice(0, 79) + "…";
       }
+=======
+
+      if (logLine.length > 80) {
+        logLine = logLine.slice(0, 79) + "…";
+      }
+
+>>>>>>> 612f6850b3d79e6bed6979e2e09e66ec240eaa9c
       log(logLine);
     }
   });
@@ -45,14 +53,31 @@ app.use((req, res, next) => {
     throw err;
   });
 
+<<<<<<< HEAD
+=======
+  // importantly only setup vite in development and after
+  // setting up all the other routes so the catch-all route
+  // doesn't interfere with the other routes
+>>>>>>> 612f6850b3d79e6bed6979e2e09e66ec240eaa9c
   if (app.get("env") === "development") {
     await setupVite(app, server);
   } else {
     serveStatic(app);
   }
 
+<<<<<<< HEAD
   const port = 5000;
   server.listen(port, "0.0.0.0", () => {
+=======
+  // ALWAYS serve the app on port 5000
+  // this serves both the API and the client
+  const port = 5000;
+  server.listen({
+    port,
+    host: "0.0.0.0",
+    reusePort: true,
+  }, () => {
+>>>>>>> 612f6850b3d79e6bed6979e2e09e66ec240eaa9c
     log(`serving on port ${port}`);
   });
 })();
