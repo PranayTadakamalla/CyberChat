@@ -21,7 +21,7 @@ interface ChatResponse {
 // Create rate limiter
 const apiLimiter = rateLimit({
   windowMs: 60 * 1000, // 1 minute
-  max: 5 // limit each IP to 5 requests per minute
+  max: 50 // limit each IP to 5 requests per minute
 });
 
 export async function generateChatResponse(message: string): Promise<ChatResponse> {
